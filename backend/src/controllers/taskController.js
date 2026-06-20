@@ -4,10 +4,12 @@ export const getTasks = async (req, res, next) => {
   try {
     await Task.updateMany(
       { user: req.user._id, completed: true, status: { $exists: false } },
-      { $set: { status: "Completed" }, $unset: { completed: "" } }
+      { $set: { status: "Completed" }, $unset: { completed: "" } },
     );
 
-    const tasks = await Task.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const tasks = await Task.find({ user: req.user._id }).sort({
+      createdAt: -1,
+    });
     res.json({ success: true, data: tasks });
   } catch (error) {
     next(error);
@@ -19,7 +21,23 @@ export const createTask = async (req, res, next) => {
     const { title, description, status, priority, dueDate } = req.body;
 
     if (!title?.trim()) {
-      return res.status(400).json({ success: false, message: "Title is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Title is required" });
+    }
+    if (dueDate) {
+      const selectedDate = new Date(dueDate);
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        return res.status(400).json({
+          success: false,
+          message: "Due date cannot be in the past",
+        });
+      }
     }
 
     const task = await Task.create({
@@ -46,13 +64,32 @@ export const updateTask = async (req, res, next) => {
     const task = await Task.findOne({ _id: req.params.id, user: req.user._id });
 
     if (!task) {
-      return res.status(404).json({ success: false, message: "Task not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
     }
 
     const { title, description, status, priority, dueDate } = req.body;
 
     if (title !== undefined && !title.trim()) {
-      return res.status(400).json({ success: false, message: "Title is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Title is required" });
+    }
+
+    if (dueDate) {
+      const selectedDate = new Date(dueDate);
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        return res.status(400).json({
+          success: false,
+          message: "Due date cannot be in the past",
+        });
+      }
     }
 
     if (title !== undefined) task.title = title.trim();
@@ -81,7 +118,9 @@ export const deleteTask = async (req, res, next) => {
     });
 
     if (!task) {
-      return res.status(404).json({ success: false, message: "Task not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
     }
 
     res.json({ success: true, message: "Task deleted successfully" });

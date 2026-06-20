@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { TaskProvider } from "./context/TaskContext";
 import Navbar from "./components/Navbar";
@@ -9,7 +9,7 @@ import Dashboard from "./pages/Dashboard";
 
 const App = () => {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <TaskProvider>
           <Navbar />
@@ -28,7 +28,7 @@ const App = () => {
           </Routes>
         </TaskProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 
